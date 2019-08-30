@@ -1,0 +1,82 @@
+---
+title: "Assignment 1 - Mushrooms"
+author: "Dhairav Chhatbar"
+date: "8/30/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Assignment
+
+Very often, we’re tasked with taking data in one form and transforming it for easier downstream analysis. We will
+spend several weeks in this course on tidying and transformation operations. Some of this work could be done in
+SQL or R (or Python or…). Here, you are asked to use R—you may use base functions or packages as you like.
+Mushrooms Dataset. A famous—if slightly moldy—dataset about mushrooms can be found in the UCI repository
+here: <https://archive.ics.uci.edu/ml/datasets/Mushroom>. 
+
+The fact that this is such a well-known dataset in the
+data science community makes it a good dataset to use for comparative benchmarking. For example, if someone
+was working to build a better decision tree algorithm (or other predictive classifier) to analyze categorical data,
+this dataset could be useful. A typical problem (which is beyond the scope of this assignment!) is to answer the
+question, “Which other attribute or attributes are the best predictors of whether a particular mushroom is
+poisonous or edible?”
+
+Your task is to study the dataset and the associated description of the data (i.e. “data dictionary”). You may need
+to look around a bit, but it’s there! You should take the data, and create a data frame with a subset of the columns
+in the dataset. You should include the column that indicates edible or poisonous and three or four other columns.
+You should also add meaningful column names and replace the abbreviations used in the data—for example, in the
+appropriate column, “e” might become “edible.” Your deliverable is the R code to perform these transformation
+tasks.
+
+## Import Data Dictionary & Dataset
+
+Import mushrooms description and dataset from GitHub
+
+```{r Import}
+path <- 'https://raw.githubusercontent.com/dhairavc/DATA607/master/Assignment%201%20agaricus-lepiota.data'
+path2 <- 'https://raw.githubusercontent.com/dhairavc/DATA607/master/Assignment1%20-%20agaricus-lepiota.names'
+
+readLines(path2)
+
+mushrooms <- read.csv(path)
+head(mushrooms)
+```
+
+## Update Column Names
+Give more meaningful header names to the dataset
+
+```{r Names}
+names(mushrooms) <- c("Class", "Cap-Shape", "Cap-Surface", "Cap-Color", "Bruises", "Odor", "Gill-Attachment", "Gill-Spacing", "Gill-Size", "Gill-Color", "Stalk-Shape","Stalk-Root","Stalk-Surface-Above-Ring","Stalk-Surface-Below-Ring","Stalk-Color-Above-Ring","Stalk-Color-Below-Ring","Veil-Type","Veil-Color","Ring-Number","Ring-Type","Spore-Print-Color","Population","Habitat")
+
+head(mushrooms)
+
+
+```
+
+## Subset Dataframe
+Create a subset of the original dataset
+
+```{r Subset}
+
+subshrooms <- mushrooms[c("Class", "Odor", "Population", "Habitat")]
+head(subshrooms)
+
+```
+
+## Name Observations
+Give useful names to observation values
+
+``` {r Namesx}
+str(subshrooms)
+levels(subshrooms[,1]) <- c("edible", "poisonus")
+levels(subshrooms[,2]) <- c("almond","creosote", "foul", "anise", "musty", "none", "pungent", "spicy", "fishy")
+levels(subshrooms[,3]) <- c("abundant", "clustered", "numerous", "scattered", "several", "solitary")
+levels(subshrooms[,4]) <- c("woods", "grasses", "leaves", "meadows", "paths", "urban", "waste")
+str(subshrooms)
+
+
+head(subshrooms)
+```
