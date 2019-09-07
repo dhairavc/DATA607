@@ -1,0 +1,56 @@
+---
+title: "Assignment 2 - SQL Connection"
+author: "Dhairav Chhatbar"
+date: "9/3/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Choose six recent popular movies.  Ask at least five people that you know (friends, family, classmates, imaginary friends) to rate each of these movie that they have seen on a scale of 1 to 5.  Take the results (observations) and store them in a SQL database.  Load the information into an R dataframe.
+
+Your deliverables should include your SQL scripts and your R Markdown code, posted to GitHub.
+
+
+## SQL Connection
+
+
+```{r SQL Connection}
+library(RMySQL)
+
+drv2 <- dbDriver("MySQL")
+con2 <- dbConnect(drv2, username="dsc", password="datascience", dbname ="movies", host="localhost")
+
+dbListTables(con2)
+```
+
+## Querying Database
+```{r Query}
+
+dbGetQuery(con2, 'select Movies.Title, Reviews.UName as UserName, Reviews.Rating from
+movies Join Reviews
+Where Movies.VID = Reviews.VID')
+
+
+
+```
+
+
+## Enter into Data Frame
+
+```{r Dataframe}
+MovieReviews <- dbGetQuery(con2, 'select Movies.Title, Reviews.UName as UserName, Reviews.Rating from
+movies Join Reviews
+Where Movies.VID = Reviews.VID')
+
+str(MovieReviews)
+
+head(MovieReviews)
+
+```
