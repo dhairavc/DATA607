@@ -1,0 +1,137 @@
+---
+title: "Assignment 3 - Regex"
+author: "Dhairav Chhatbar"
+date: "9/13/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Question 3
+
+Copy the introductory example. The vector namestores the extracted names.
+
+R> name
+
+[1] "Moe Szyslak"       "Burns, C. Montgomery" "Rev. Timothy Lovejoy"
+
+[4] "Ned Flanders"      "Simpson, Homer"       "Dr. Julius Hibbert"
+
+**(a)  Use the tools of this chapter to rearrange the vector so that all elements conform to the standard first_name last_name.**
+
+```{r 3a}
+library(stringr)
+names <- c("Moe Szyslak", "Burns, C. Montgomery", "Rev. Timothy Lovejoy", "Ned Flanders", "Simpson, Homer", "Dr. Julius Hibbert")
+
+names
+
+first_name <- unlist(str_extract_all(names,"[[:alpha:]]+\\s|[.,] [[:alpha:]]+$"))
+first_name <- unlist(str_extract_all(first_name, "[[:alpha:]]+"))
+first_name
+
+last_name <- str_extract(names, "([[:alpha:]]+?[,]|[[:alpha:]]+$)")
+last_name <- str_extract(last_name, "[^,]+")
+last_name
+
+firstlast <- str_c(first_name, " ", last_name)
+firstlast
+
+
+
+
+
+```
+
+**(b) Construct a logical vector indicating whether a character has a title (i.e.,Rev. and Dr.).**
+```{r 3b}
+title <-str_detect(names, "^[[:alpha:]]+?['.']")
+title 
+```
+
+**(c) Construct a logical vector indicating whether a character has a second name.**
+```{r 3c}
+second_name <- str_detect(names, "[[:upper:]]['.']")
+second_name
+```
+
+### Question 4
+Describe the types of strings that conform to the following regular expressions and construct an example that is matched by the regular expression.
+
+**(a) [0-9]+\\$**
+```{r 4a}
+#Returns a string of numbrs of n length ending with the character $
+
+s4a <- c("56424895314$", "534565645656", "dsdf542$65201" , "a442367", "b542346y", "abc123$0$ qw567$$")
+unlist(str_extract_all(s4a, "[0-9]+\\$"))
+
+
+```
+
+**(b) \\b[a-z]{1,4}\\b**
+```{r 4b}
+#Returns a string of lowercase letters of length 1, 2, 3, or 4
+
+s4b <- c("ahdb32ja", "a", "ab", "abc", "aBc", "abcd", "123abcd", "ab89@0", "371$12")
+unlist(str_extract_all(s4b, "\\b[a-z]{1,4}\\b"))
+
+```
+
+**(c) .*?\\.txt$ **
+```{r 4c}
+#Returns a string of length n of any characters (except new line) ending in the text '.txt' or just the text '.txt'
+
+s4c <- c("filename.txt", "file name.txt", "284@$.!.txt", "284@$.!.", "2file name.txt", ".txt", "abc", "2.txt")
+unlist(str_extract_all(s4c, ".*?\\.txt$"))
+
+```
+
+**(d) \\d{2}/\\d{2}/\\d{4}**
+```{r 4d}
+#Returns a date of format xx/xx/xxxx where x is a while number
+s4d <- c("42", "33/35/99", "01/18/2199", "33\22\1111")
+
+unlist(str_extract_all(s4d, "\\d{2}/\\d{2}/\\d{4}"))
+
+```
+
+**(e) <(.+?)>.+?</\\1>**
+```{r 4e}
+#Returns a string what starts with the format <s1> s2 </s1>, where s1 is a string of any length and characters, and s2 is a string of any length. This string usually represents internet tags
+
+s5e <- c("abcd", "4sdf asdf", "2", "  ", "abc xyz /abc", "<html> Hello World 1 </html>", "<a> b </c>", "<a> b </a>", "<b>  </b>", "<abc 123> b@2 </abc 123>")
+
+str_extract_all(s5e, "<(.+?)>.+?</\\1>")
+
+```
+
+### Question 9
+The following code hides a secret message. Crack it with R and regular expressions. Hint: Some of the characters are more revealing than others! The code snippet is also available in the materials at www.r-datacollection.com.
+
+clcopCow1zmstc0d87wnkig7OvdicpNuggvhryn92Gjuwczi8hqrfpRxs5Aj5dwpn0Tanwo
+Uwisdij7Lj8kpf03AT5Idr3coc0bt7yczjatOaootj55t3Nj3ne6c4Sfek.r1w1YwwojigO
+d6vrfUrbz2.2bkAnbhzgv4R9i05zEcrop.wAgnb.SqoU65fPa1otfb7wEm24k6t3sR9zqe5
+fy89n6Nd5t9kc4fE905gmc4Rgxo5nhDk!gr
+
+```{r 9}
+
+unknowntext <- "clcopCow1zmstc0d87wnkig7OvdicpNuggvhryn92Gjuwczi8hqrfpRxs5Aj5dwpn0TanwoUwisdij7Lj8kpf03AT5Idr3coc0bt7yczjatOaotj55t3Nj3ne6c4Sfek.r1w1YwwojigOd6vrfUrbz2.2bkAnbhzgv4R9i05zEcrop.wAgnb.SqoU65fPa1otfb7wEm24k6t3sR9zqe5fy89n6Nd5t9kc4fE905gmc4Rgxo5nhDk!gr"
+
+#Remove all lower cases
+knowntext <- unlist(str_extract_all(unknowntext, "[[:upper:]]|[[:punct:]]"))
+knowntext
+
+#combine into one string
+knowntext <- str_c(knowntext, collapse = "")
+knowntext
+
+#Split string on the "." characters and put each word in individual element
+knowntext <- unlist(str_split(knowntext, "\\."))
+knowntext
+
+
+```
