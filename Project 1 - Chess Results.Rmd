@@ -1,0 +1,153 @@
+---
+title: "Project 1"
+author: "Dhairav Chhatbar"
+date: "9/15/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+### Project 1
+
+In this project, you’re given a text file with chess tournament results where the information has some structure. Your job is to create an R Markdown file that generates a .CSV file (that could for example be imported into a SQL database) with the following information for all of the players:
+
+Player’s Name
+
+Player’s State
+
+Total Number of Points
+
+Player’s Pre-Rating
+
+Average Pre Chess Rating of Opponents
+
+For the first player, the information would be:
+
+Gary Hua, ON, 6.0, 1794, 1605
+
+1605 was calculated by using the pre-tournament opponents’ ratings of 1436, 1563, 1600, 1610, 1649, 1663, 1716, and dividing by the total number of games played.
+
+### Import Data
+Load text file into GitHub repository and read into R. Trim any trailing white spaces
+```{r Import}
+library(stringr)
+path <- 'https://raw.githubusercontent.com/dhairavc/DATA607/master/tournamentinfo.txt'
+
+chess_results <- readLines(path, warn = FALSE)
+chess_results <- str_trim(chess_results, side = 'right')
+chess_results
+
+```
+
+### Get Lines
+Seperate data into into two patterns for extraction
+``` {r Names}
+Line1 <- grep(chess_results, pattern = "[[:space:]]{3,}[[:digit:]]{1,2}", value = TRUE)
+Line1
+
+Line2 <- grep(chess_results, pattern = "[[:space:]]{3}[[:alpha:]]{2}", value = TRUE)
+Line2
+```
+
+### Get Player ID
+Extract the Player ID. This ID can be used a primary identifier in the data for the player table
+``` {r Player ID}
+player_ID <- str_extract(Line2, "[[:digit:]]{8}")
+chess_results_table <- data.frame(player_ID)
+head(chess_results_table)
+
+```
+
+### Get Pair
+Extract the player's pair number
+``` {r pair}
+
+pair_num <- str_extract(Line1, "^(.{5})")
+pair_num <- str_trim(pair_num, side = 'both')
+
+chess_results_table$Pair_Num <- as.numeric(pair_num)
+#chess_results_table <- data.frame(as.numeric(pair_num))
+#chess_results_table)[2] <- "Pair_Num"
+head(chess_results_table)
+
+```
+
+
+### Get Names
+Extract player names
+``` {r P Names}
+player_names <- str_extract(Line1, "\\|[[:space:]]([[:alpha:]]*[[[:space:]]|[[:punct:]]])*[[:space:]]")
+player_names <- str_sub(player_names, 3, length(player_names))
+player_names <- str_trim(player_names, side = 'right')
+chess_results_table$Player_Name <- player_names
+head(chess_results_table)
+
+```
+
+### Get State
+Extract player state
+```{r getState}
+player_state <- str_extract(Line2, "[[:alpha:]]{2}")
+chess_results_table$State <- player_state
+head(chess_results_table)
+
+```
+
+
+
+
+### Get Points
+Extract player points
+``` {r points}
+player_points <- str_extract(Line1, "[[:digit:]]\\.[[:digit:]]")
+chess_results_table$Points <-  as.numeric(player_points)
+head(chess_results_table)
+
+
+```
+
+### Get Pre_Rating
+Extract each player's rating
+``` {r pre Rating}
+pre_rating <- str_extract(Line2, "R:[[:space:]]{1,2}[[:digit:]]{3,4}")
+pre_rating <- str_extract(pre_rating, "[[:digit:]]{3,4}")
+chess_results_table$Pre_Rating  <- as.numeric(pre_rating)
+head(chess_results_table)
+```
+
+
+
+### Average Pre Chess Rating of Opponents
+Based on the amount of matches each player has played, compute the average rating for all of each's player's opponents
+``` {r Average Pre Chess Rating of Opponents, fig.width=52}
+opps_played <- str_extract_all(Line1, "[W,L,D,U][[:space:]]{2}[[[:digit:]][[:space:]]][[:digit:]]")
+opps <- suppressWarnings(str_extract_all(opps_played, "[[:digit:]]{1,2}"))
+avg_rating <- vector()
+
+for(i in 1:nrow(chess_results_table))
+{
+  avg_rating[i] <- mean(chess_results_table$Pre_Rating[as.integer(opps[[i]])])
+}
+
+chess_results_table$Opp_Avg_Rating <- avg_rating
+
+```
+
+### Final Table
+Display the final table in a format that can be imported into a database
+``` {r Finaltable, width = 8}
+library(kableExtra)
+kable(chess_results_table) %>% kable_styling(bootstrap_options = c("striped", "hover"))
+
+
+```
+
+### Write CSV
+Produce a CSV file, which can be imporated into a database
+```{r CSV}
+write.csv(chess_results_table, file = "ChessResults.csv", row.names = FALSE )
+
+```
+
+
