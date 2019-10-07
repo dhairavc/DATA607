@@ -1,0 +1,210 @@
+---
+title: "Project 2"
+author: "Dhairav Chhatbar"
+date: "10/3/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+### Dataset 1: Airline On-Time Statistics and Delay Causes
+
+Source: https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp?pn=1  
+Time Range: 7/2014 - 7/2019  
+Airports: All major airports
+
+## Import Data
+```{r}
+path1 <- 'https://raw.githubusercontent.com/dhairavc/DATA607/master/Flight_Delays_Actual_2014.csv'
+
+flights_raw <- read.csv(path1)
+str(flights_raw)
+
+
+```
+## Data By Month
+In the past 5 years, the total amounts of flights by each months have remained relatively close from month to month, except for July which sees a spike in travel.
+We see that the number of delays in the summer months of June, July and August are the most, with delays peaking in July. September October and November, have the least delays and then there is a sharp increase of delays in December.
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+flights_raw %>% select(X.month, arr_flights, arr_del15) %>% drop_na() %>% group_by(X.month) %>%
+  summarise(total_flights = sum(arr_flights), total_delayed = sum(arr_del15)) %>% 
+  mutate(del_pct = total_delayed/total_flights) %>% ggplot(aes(x = X.month, y=total_flights)) +
+  geom_bar(stat = 'identity')
+
+flights_raw %>% select(X.month, arr_flights, arr_del15) %>% drop_na() %>% group_by(X.month) %>%
+  summarise(total_flights = sum(arr_flights), total_delayed = sum(arr_del15)) %>% 
+  mutate(del_pct = total_delayed/total_flights) %>% ggplot(aes(x = X.month, y=total_delayed)) +
+  geom_bar(stat = 'identity')
+```
+
+
+### Data by Year 
+If we see, what is attributing to most of the dealys over the years are from the National Avaiation Service.
+
+
+```{r, warning=FALSE}
+del_by_year <- flights_raw %>% select(year, carrier_ct, X.weather_ct, nas_ct, security_ct, late_aircraft_ct) %>% drop_na() %>% group_by(year) %>% summarise_all(funs(sum)) %>% gather(key = del_reason, value = del_count, carrier_ct:late_aircraft_ct) 
+
+
+ggplot(del_by_year, aes(x=del_by_year$year, y=del_by_year$del_count, group=del_by_year$del_reason, color = del_by_year$del_reason)) + geom_line(size=1) + geom_point()
+
+
+```
+
+### Data by Airline and Airport
+If we look at the delay percentages by carrier and airport, there is one combination that stands out, ExpressJet Airlines Inc. is consistently delayed more than any other carrier when arriving at Las Vegas, NV: McCarran International Airport. 
+```{r Airport, fig.width=10}
+
+flights_raw %>% select(carrier, airport, arr_del15, arr_flights) %>% drop_na() %>% group_by(airport, carrier) %>% summarize_all(funs(sum)) %>% mutate(del_pct = arr_del15/arr_flights) %>%
+  ggplot(aes(x=airport, y=carrier, fill=del_pct)) + geom_tile() + theme(axis.text.x=element_text(angle=90, hjust=1)) + scale_fill_gradient(low = "pink", high = "red")
+```
+
+
+## Data Set 2: AirBnb
+
+This data file includes all needed information to find out more about hosts, geographical availability, necessary metrics to make predictions and draw conclusions.
+
+source: https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data
+
+
+
+## Load Data:
+```{r load set 2}
+set2 <- 'https://raw.githubusercontent.com/dhairavc/DATA607/master/ABNB.csv'
+abnb_ny <- read.csv(set2)
+str(abnb_ny)
+
+```
+
+### Popular Neighborhood
+The amount if AirBnB listings in Manhattan and Brooklyn far outweigh the other 3 boroughs of NYC. Breaking it down furhter we see a distribution of neighborhoods within Manhattan and Brooklyn. And we see the top 3 listings of each borough
+
+```{r neighborhood}
+
+library(ggmap)
+
+abnb_ny %>% select(neighbourhood_group, neighbourhood) %>% drop_na() %>% count(neighbourhood_group) %>%
+  ggplot(aes(x=neighbourhood_group, y = n)) + geom_col()
+
+
+abnb_ny %>% select(neighbourhood_group, neighbourhood) %>% drop_na() %>% filter(neighbourhood_group == "Manhattan") %>% count(neighbourhood) %>% ggplot(aes(x=neighbourhood, y = n)) + geom_col() + coord_flip()
+
+abnb_ny %>% select(neighbourhood_group, neighbourhood) %>% drop_na() %>% filter(neighbourhood_group == "Brooklyn") %>% count(neighbourhood) %>% ggplot(aes(x=neighbourhood, y = n)) + geom_col() + coord_flip()
+
+
+
+abnb_ny %>% select(neighbourhood_group, neighbourhood) %>% drop_na()  %>% count(neighbourhood_group, neighbourhood, name = "Count") %>% group_by(neighbourhood_group) %>% top_n(3) 
+
+
+
+```
+
+### By Price
+If we look at the rent, the distribution is highly skewed to the right, indicating some outrageous prices. A zoomed in dot plot shows that the outliers are spread across all 5 boroughs, so therefore to unserstand the average price in these locations we should look at the median price and interquartile range of each becuase the extreme outliers will skew the mean and standard deviation.
+
+When looking at the Median and IRQ, we see that Manhattan and Brooklyn, command the largest rents, and the Bronx being the lowest. 
+```{r price, fig.width=15, fig.height=15}
+library(RColorBrewer)
+library(stats)
+
+
+abnb_ny %>% select(neighbourhood_group, price) %>% drop_na() %>% ggplot( aes(x = price, fill=neighbourhood_group)) + geom_dotplot(stat = "identity", binwidth = 5.5) + coord_flip() + scale_fill_brewer(palette="Dark2")
+
+abnb_ny %>% select(neighbourhood_group, price) %>% drop_na() %>% ggplot( aes(x = price, fill=neighbourhood_group)) + geom_dotplot(stat = "identity", binwidth = 100) + coord_flip() + scale_fill_brewer(palette="Dark2")
+
+abnb_ny %>% select(neighbourhood_group, price) %>% drop_na() %>% ggplot( aes(x = neighbourhood_group, y = price, fill=neighbourhood_group)) + geom_boxplot() +
+scale_fill_brewer(palette="Pastel1") +  ylim(0, 400) 
+
+abnb_ny %>% select(neighbourhood_group, price) %>% drop_na() %>% group_by(neighbourhood_group) %>% summarise(p_mean = mean(price), p_sd = sd(price), p_median = median(price), p_irq = IQR(price))
+
+
+```
+
+### By Populatiry
+
+Below is a list of the most active rents for each boroughs. 
+```{r pop}
+
+abnb_ny %>% select(neighbourhood_group, neighbourhood, number_of_reviews) %>% group_by(neighbourhood_group) %>% top_n(3) %>% arrange(neighbourhood_group, number_of_reviews)
+
+```
+### Revenue by group
+Since we have the price per rental and the number of reviews per listing, we can assume that each review is a confirmed purchase, and a minimum revenue can be generated per unit. When grouped by boroughs, if we want to consider what is the likely revenue, we will again look at the Median and IRQ due to the extreme outliers. Surprisingly Staten Island has the highest median. 
+```{r, fig.width=8}
+
+abnb_ny %>% select(neighbourhood_group, number_of_reviews, price) %>% drop_na() %>% mutate(revenue = number_of_reviews*price) %>% group_by(neighbourhood_group) %>% summarise(r_mean = mean(revenue), r_stv = sd(revenue), r_median = median(revenue), r_irq = IQR(revenue))
+
+abnb_ny %>% select(neighbourhood_group, neighbourhood, number_of_reviews, price) %>% drop_na() %>% mutate(revenue = number_of_reviews*price) %>%
+  ggplot( aes(x = neighbourhood_group, y=revenue, fill=neighbourhood_group)) + geom_boxplot() + 
+scale_fill_brewer(palette="Pastel1") +  ylim(0, 4000)
+
+
+
+```
+### Revenue by Neighborhood
+If we look at revenue across the neighborhoods, and look at the top 3 neighborhoods from each boroughs, Staten Island shows again to have higher median prices
+```{r r_neighbourhood}
+
+abnb_ny %>% select(neighbourhood_group, neighbourhood, price, number_of_reviews) %>% drop_na() %>% mutate(revenue = number_of_reviews*price) %>%  group_by(neighbourhood_group, neighbourhood) %>% summarise(n_mean = mean(revenue), n_stv = sd(revenue), n_median = median(revenue), n_irq = IQR(revenue)) %>% arrange(neighbourhood_group, desc(n_median)) %>% top_n(3, n_median)
+
+```
+
+
+## Dataset 3: Bikeshare Scooter Systems
+
+Source: http://osav-usdot.opendata.arcgis.com/datasets/9c1c7f3f171c4d21a010b9082332bbca_0?selectedAttributes%5B%5D=PlaceID&chartType=line
+
+The bikeshare and e-scooter layer is current as of October 2, 2019. It is a list of cities served by a bikeshare and/or e-scooter system in each year from 2015 to 2019. Some systems serve more than one city. The layer lists just the primary city served. Bikeshare includes systems that are open to the general public, IT-automated, and station based (contain hubs to which users can grab and return a bike) as well as dockless systems. The layer includes a count of the number of docking stations, the number of dockless bikeshare
+
+### Import Data
+```{r set 3}
+
+set3 <- "https://raw.githubusercontent.com/dhairavc/DATA607/master/Bikeshare_Scooter_Systems.csv"
+bss <- read.csv(set3)
+
+str(bss)
+
+```
+
+## By Country
+If we look across the country, the 3 major types of shared systems are, bicycles, scooters, and dockless scooters. Looking at a time series of all 3, scooters are relatively flat for the past 4 years. Bicycles far outnumber scooters and show an expansion for the first 3 years and a contraction in the last. 
+```{r Country}
+
+bss %>% select(Year, dockCt, docklessCt, scooterCt) %>% group_by(Year) %>% summarise_all(funs(sum)) %>% gather( key = share_system, value = system_count, dockCt:scooterCt) %>% ggplot( aes(x=Year, y=system_count, group=share_system, color = share_system)) + geom_line(size=1) + geom_point()
+
+```
+
+## By State
+If we look at a state by state heatmap of all 3 systems, most of the country is relatively stable, except for NY, IL, DC, and MA, which show increases in the amount of bike docks in the respective states
+```{r state, fig.height=10, fig.width=10}
+
+bss %>% select(Year, State, dockCt, docklessCt, scooterCt) %>% gather( key = share_system, value = system_count, 3:5) %>% ggplot( aes(x=Year, y=State, fill=system_count)) + geom_tile() + facet_grid(~share_system) + scale_fill_gradient(low = "light blue", high = "plum1")
+
+```
+### By Company
+If for the shared bikes, if we look at each company in terms of how many states they are in and how many docking stations do they operate. We observe that while the company B-Cycle is in the most states, it is Citi Bike that operates the most amount of docks, and most likely has the
+```{r company, fig.width=15, fig.height=50}
+library(stringr)
+library(tidyr)
+library(dplyr)
+
+bss_bikes <- bss %>% select(dockNm, dockCt, Year, State) %>% filter(dockCt != 0)
+
+bss_bikes$dockNm <- str_replace_all(bss_bikes$dockNm, "(.*)B-cycle$", "B-Cycle")
+bss_bikes$dockNm <- str_replace_all(bss_bikes$dockNm, "(^Citi Bike).*", "Citi Bike")
+bss_bikes$dockNm <- str_replace_all(bss_bikes$dockNm, "(^Zagstar).*", "Zagstar")
+
+bss_bikes %>% select(dockNm, Year, dockCt, State) %>% group_by(dockNm, Year) %>% summarize( docks = sum(dockCt), State = n()) %>% gather( key = stat, value = val_type, 3:4)
+
+
+bss_bikes %>% select(dockNm, Year, dockCt, State) %>% group_by(dockNm, Year) %>% summarize( docks = sum(dockCt), State = n()) %>% gather( key = stat, value = val_type, 3:4) %>% filter(stat == "State") %>% ggplot( aes(x=dockNm, y=val_type)) + geom_col() + facet_wrap(~Year) + coord_flip()
+
+bss_bikes %>% select(dockNm, Year, dockCt, State) %>% group_by(dockNm, Year) %>% summarize( docks = sum(dockCt), State = n()) %>% gather( key = stat, value = val_type, 3:4) %>% filter(stat == "docks") %>% ggplot( aes(x=dockNm, y=val_type)) + geom_col() + facet_wrap(~Year) + coord_flip()
+```
+
+
