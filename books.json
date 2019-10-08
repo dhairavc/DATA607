@@ -1,0 +1,26 @@
+{"favoritebooks": [
+{
+ "title": "Cosmos"
+ "author": ["Carl Sagan", "Neil deGrasse Tyson", "Ann Druyan"]
+ "publisher": "Random House Publishing Group"
+ "publicationdate": "12/10/2013"
+ "pages": 432
+}
+
+{
+ "title": "The Hobbit and The Lord of the Rings"
+ "author": ["J. R. R. Tolkien"]
+ "publisher": "Houghton Mifflin Harcourt"
+ "publicationdate": "09/18/2012"
+ "pages": 1504
+}
+
+{
+ "title": "A Game of Thrones"
+ "author": ["George R. R. Martin"]
+ "publisher": "Random House Publishing Group"
+ "publicationdate": "08/04/1997"
+ "pages": 864
+}
+]
+}
