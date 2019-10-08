@@ -5,7 +5,7 @@
     <title> Cosmos </title>
     <author> Carl Sagan, Neil deGrasse Tyson, Ann Druyan </author>
     <Publisher> Random House Publishing Group </Publisher>
-    <Publication Date> 12/10/2013 </Publication Date>
+    <PublicationDate> 12/10/2013 </PublicationDate>
 	<Pages> 432 </Pages>
   </book>
 
@@ -13,7 +13,7 @@
     <title> The Hobbit and The Lord of the Rings </title>
     <author> J. R. R. Tolkien </author>
     <Publisher> Houghton Mifflin Harcourt </Publisher>
-    <Publication Date> 09/18/2012 </Publication Date>
+    <PublicationDate> 09/18/2012 </PublicationDate>
 	<Pages> 1504 </Pages>
   </book>
   
@@ -21,7 +21,7 @@
     <title> A Game of Thrones </title>
     <author> George R. R. Martin </author>
     <Publisher> Random House Publishing Group </Publisher>
-    <Publication Date> 08/04/1997 </Publication Date>
+    <PublicationDate> 08/04/1997 </PublicationDate>
 	<Pages> 864 </Pages>
   </book>
 
