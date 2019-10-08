@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <favoritebooks>
 
-  <book>
+  <book id="1">
     <title> Cosmos </title>
     <author> Carl Sagan, Neil deGrasse Tyson, Ann Druyan </author>
     <Publisher> Random House Publishing Group </Publisher>
@@ -9,7 +9,7 @@
 	<Pages> 432 </Pages>
   </book>
 
-  <book>
+  <book id="2">
     <title> The Hobbit and The Lord of the Rings </title>
     <author> J. R. R. Tolkien </author>
     <Publisher> Houghton Mifflin Harcourt </Publisher>
@@ -17,7 +17,7 @@
 	<Pages> 1504 </Pages>
   </book>
   
-    <book>
+    <book id="3">
     <title> A Game of Thrones </title>
     <author> George R. R. Martin </author>
     <Publisher> Random House Publishing Group </Publisher>
